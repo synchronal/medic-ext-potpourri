@@ -2,7 +2,9 @@
 
 An extension pack with a medley of scripts and helpers for [medic-rs](https://github.com/synchronal/medic-rs).
 
-Checks and steps may depend on languages, for instance Elixir.
+Checks and steps may depend on languages or frameworks being available in the `PATH`.
 
-- `medic-check-hostess` - Elixir - checks whether `hostess` has been used to provide
-  host aliases in `/etc/hosts`.
+| name                  | dependencies | description |
+| --------------------- | ------------ | ----------- |
+| `medic-check-hostess` | Elixir       | Checks whether `hostess` has been used to provide host aliases in `/etc/hosts`. |
+
