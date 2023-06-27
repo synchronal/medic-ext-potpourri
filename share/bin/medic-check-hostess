@@ -1,0 +1,103 @@
+#!/usr/bin/env elixir
+
+defmodule Cli do
+  def usage(cmd, dvc \\ :stdio) do
+    case cmd do
+      "host-exists" ->
+        IO.puts(dvc, """
+          Ensure that a hostname has been specified in /etc/hosts using hostess
+
+          \x1b[4;1mUsage:\x1b[0;1m medic-check-hostess host-exists\x1b[0m <COMMAND>
+
+          \x1b[4;1mOptions:\x1b[0m
+            \x1b[1m--name\x1b[0m <NAME>              A hostname that should be aliased to 127.0.0.1
+            \x1b[1m--prepend-hostname\x1b[0m <BOOL>  Prepends the short hostname to the name
+            \x1b[1m--help\x1b[0m
+          """)
+      "installed" ->
+        IO.puts(dvc, """
+          Ensure that a hostess has been installed
+
+          \x1b[4;1mUsage:\x1b[0;1m medic-check-hostess installed\x1b[0m <COMMAND>
+
+          \x1b[4;1mOptions:\x1b[0m
+            \x1b[1m--help\x1b[0m
+          """)
+      _ ->
+        IO.puts(dvc, """
+          Checks for interacting with hostess, ie /etc/hosts
+
+          \x1b[4;1mUsage:\x1b[0;1m medic-check-hostess\x1b[0m <COMMAND>
+
+          \x1b[4;1mCommands:\x1b[0m
+            \x1b[1mhost-exists\x1b[0m  Checks that a host is aliased to 127.0.0.1
+            \x1b[1minstalled\x1b[0m    Checks that a hostess is installed
+
+          \x1b[4;1mOptions:\x1b[0m
+            \x1b[1m--help\x1b[0m
+          """)
+    end
+  end
+end
+
+defmodule Local.Checks.Hostess do
+  def host_exists?(opts) do
+    host = hostname(opts)
+
+    case System.cmd("hostess", ["has", host]) do
+      {_output, 0} -> :ok
+      {output, _} -> {:error, "expected “#{host}“ to exist: #{output}", "sudo hostess add #{host} 127.0.0.1"}
+    end
+  end
+
+  def installed? do
+    case System.cmd("which", ["hostess"]) do
+      {_output, 0} -> :ok
+      {_output, _} -> {:error, "expected hostess to be present", "brew install hostess"}
+    end
+  end
+
+  # # #
+
+  defp hostname(opts) do
+    domain = Keyword.fetch!(opts, :name)
+
+    if Keyword.get(opts, :prepend_hostname) do
+      {hostname, 0} = System.cmd("hostname", ["-s"])
+      "#{String.downcase(String.trim(hostname))}.#{domain}"
+    else
+      domain
+    end
+  end
+end
+
+case OptionParser.parse(System.argv(), strict: [name: :string, prepend_hostname: :boolean, help: :boolean]) do
+  {[help: true], commands, _} ->
+    Cli.usage(List.first(commands))
+
+  {opts, ["host-exists" | _], _} ->
+    case Local.Checks.Hostess.host_exists?(opts) do
+      :ok -> :ok
+      {:error, msg, remedy} ->
+        IO.puts(:stderr, msg)
+        IO.puts(remedy)
+        System.halt(1)
+    end
+
+  {_, ["installed" | _], _} ->
+    case Local.Checks.Hostess.installed?() do
+      :ok -> :ok
+      {:error, msg, remedy} ->
+        IO.puts(:stderr, msg)
+        IO.puts(remedy)
+        System.halt(1)
+    end
+
+  {_, ["help"], _} ->
+    Cli.usage(nil)
+
+  {_, commands, _} ->
+    Cli.usage(List.first(commands), :stderr)
+    System.halt(1)
+end
+
