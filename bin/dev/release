@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+source "$(brew --prefix)/share/medic-bash/cecho.bash"
+source "$(brew --prefix)/share/medic-bash/step.bash"
+
+mkdir -p tmp/release
+
+step "Package tarfile" \
+  "tar -czf tmp/release/medic-ext-potpourri.tar.gz share/*"
+
+step "Generate shasum" \
+  "(cd tmp/release && sha256sum medic-ext-potpourri.tar.gz > medic-ext-potpourribash.tar.gz.sha256sum)"
+
+cecho --bright-green "\nChecksums:"
+cat tmp/release/*.sha256sum
+
+
