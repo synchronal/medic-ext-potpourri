@@ -9,7 +9,7 @@ step "Package tarfile" \
   "tar -czf tmp/release/medic-ext-potpourri.tar.gz share/*"
 
 step "Generate shasum" \
-  "(cd tmp/release && sha256sum medic-ext-potpourri.tar.gz > medic-ext-potpourribash.tar.gz.sha256sum)"
+  "(cd tmp/release && sha256sum medic-ext-potpourri.tar.gz > medic-ext-potpourri.tar.gz.sha256sum)"
 
 cecho --bright-green "\nChecksums:"
 cat tmp/release/*.sha256sum
