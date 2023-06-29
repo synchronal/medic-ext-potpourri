@@ -6,7 +6,7 @@ source "$(brew --prefix)/share/medic-bash/step.bash"
 mkdir -p tmp/release
 
 step "Package tarfile" \
-  "tar -czf tmp/release/medic-ext-potpourri.tar.gz share/*"
+  "(cd share/bin && tar -czf ../../tmp/release/medic-ext-potpourri.tar.gz *)"
 
 step "Generate shasum" \
   "(cd tmp/release && sha256sum medic-ext-potpourri.tar.gz > medic-ext-potpourri.tar.gz.sha256sum)"
