@@ -11,7 +11,7 @@ brew tap synchronal/tap
 brew install medic-ext-potpourri
 ```
 
-Example `Brewfile``:
+Example `Brewfile`:
 
 ```shell
 tap 'synchronal/tap'
